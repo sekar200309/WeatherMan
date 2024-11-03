@@ -19,59 +19,33 @@ function success(pos) {
     lat = crd.latitude;
     lon = crd.longitude;
 
-
     let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 
-
     fetch(url)
-        .then((res) => res.json())
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then((data) => {
-
-            // console.log(data.name, lat, lon);
+            console.log(data); // Log the entire data response for debugging
 
             let cityName = data.name;
             let description = data.weather[0].description;
             let imageCode = data.weather[0].id;
             let humidity = data.main.humidity;
             let temperature = data.main.temp - 273.15;
-            // console.log(imageCode)
-            // console.log(cityName, description, humidity, temperature);
+
             areaName.textContent = cityName;
             currentStatus.textContent = description;
-            tempDisplay.textContent = temperature.toFixed(2) + "°";
+            tempDisplay.textContent = temperature.toFixed(2) + "°C"; // Specify units
             humidityDisplay.textContent = humidity + "%";
 
-            switch (imageCode) {
-                case 200:
-                    humimg.src = "./img/2.gif";
-                    break;
-                case 300:
-                    humimg.src = "./img/3.gif";   
-                    break;
-                case 500:
-                    humimg.src = "./img/5.gif";   
-                    break;
-                case 600:
-                    humimg.src = "./img/6.gif";  
-                    break;
-                case 700:
-                    humimg.src = "./img/7.gif";  
-                    break;
-                case 800:
-                    humimg.src = "./img/8.gif";  
-                    break;
-            
-                default:
-                    humimg.src = "./img/2.gif";  
-                    break;
-            }
-            
-
-
+            // Handle weather icons based on imageCode
+            humimg.src = `./img/${imageCode}.gif`; // Adjust this according to your image naming convention
         })
-        .catch((err) => console.error('Error:', err));
-
-
+        .catch((err) => console.error('Fetch error:', err));
 }
 
 function error(err) {
@@ -80,5 +54,3 @@ function error(err) {
 
 // Pass the function references to watchPosition
 navigator.geolocation.watchPosition(success, error, options);
-
-
